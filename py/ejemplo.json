@@ -1,0 +1,10 @@
+{
+  "Key":"value",
+  "no_control":"21590290",
+  "edad": 22,
+  "nacimiento": "2003-10-07",
+  "materias": [
+                {"materia": "ADB", "calificacion":80 },
+                {"materia": "WEB", "calificacion":90 }
+              ]
+}

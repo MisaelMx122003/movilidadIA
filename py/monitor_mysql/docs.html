@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor MySQL QPS - Documentación</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        code {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2f3640;
+            color: #f5f6fa;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border-left: 4px solid #3498db;
+        }
+        p, li, td {
+            color: #333;
+        }
+        .emoji { font-size: 1.2em; }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #00b894;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #74b9ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        ul { padding-left: 20px; }
+        li { margin: 8px 0; }
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .toc ul { list-style: none; padding-left: 0; }
+        .toc a { text-decoration: none; color: #3498db; }
+        .toc a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="emoji">📊</span> Monitor MySQL QPS</h1>
+        <p>Monitor en tiempo real para medir consultas por segundo en MySQL usando Flask y Chart.js.</p>
+
+        <div class="toc">
+            <h3>Tabla de Contenidos</h3>
+            <ul>
+                <li><a href="#requisitos">📋 Requisitos Previos</a></li>
+                <li><a href="#instalacion">🚀 Instalación</a></li>
+                <li><a href="#ejecucion">🏃♂️ Ejecutar la aplicación</a></li>
+                <li><a href="#problemas">🔧 Solución de problemas</a></li>
+                <li><a href="#caracteristicas">📊 Características</a></li>
+                <li><a href="#pruebas">🧪 Generar actividad de prueba</a></li>
+                <li><a href="#estructura">📁 Estructura del proyecto</a></li>
+                <li><a href="#diagnostico">🚨 Comandos de diagnóstico</a></li>
+            </ul>
+        </div>
+
+        <h2 id="requisitos"><span class="emoji">📋</span> Requisitos Previos</h2>
+        <ul>
+            <li>Python 3.7+</li>
+            <li>pipenv (instalar con <code>pip install pipenv</code>)</li>
+            <li>MySQL Server 5.7+ o MariaDB</li>
+            <li>Usuario MySQL con permisos para consultar estadísticas globales</li>
+        </ul>
+
+        <h2 id="instalacion"><span class="emoji">🚀</span> Instalación</h2>
+
+        <h3>1. Instalar dependencias con pipenv</h3>
+        <pre><code>cd monitor_mysql
+pipenv install</code></pre>
+
+        <h3>2. Configurar MySQL</h3>
+
+        <h4>Crear usuario para monitoreo:</h4>
+        <pre><code>CREATE USER 'monitor'@'localhost' IDENTIFIED BY 'monitor123';
+GRANT PROCESS ON *.* TO 'monitor'@'localhost';
+GRANT SELECT ON information_schema.* TO 'monitor'@'localhost';
+FLUSH PRIVILEGES;</code></pre>
+
+        <h4>O usar usuario existente con permisos:</h4>
+        <pre><code>GRANT PROCESS ON *.* TO 'web'@'localhost';
+GRANT SELECT ON information_schema.* TO 'web'@'localhost';
+FLUSH PRIVILEGES;</code></pre>
+
+        <h3>3. Configurar credenciales</h3>
+        <p>Edita las credenciales en <code>app.py</code>:</p>
+        <pre><code>DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'web',           # Tu usuario MySQL
+    'password': '123456789', # Tu contraseña
+    'database': 'information_schema'
+}</code></pre>
+
+        <h2 id="ejecucion"><span class="emoji">🏃♂️</span> Ejecutar la aplicación</h2>
+        <pre><code>pipenv run python app.py</code></pre>
+
+        <h3>O activar el entorno virtual:</h3>
+        <pre><code>pipenv shell
+python app.py</code></pre>
+
+        <div class="success">
+            <strong>Acceder a:</strong> <a href="http://localhost:5000" target="_blank">http://localhost:5000</a>
+        </div>
+
+        <h2 id="problemas"><span class="emoji">🔧</span> Solución de problemas</h2>
+
+        <h3>Error de conexión MySQL</h3>
+        <div class="warning">
+            <code>Error: Access denied for user 'web'@'localhost'</code><br>
+            <strong>Solución:</strong> Verificar credenciales y permisos del usuario
+        </div>
+
+        <h3>Gráfica no se actualiza</h3>
+        <ol>
+            <li>Verificar logs en la terminal de Flask</li>
+            <li>Abrir consola del navegador (F12) para ver errores</li>
+            <li>Asegurar que hay actividad en MySQL</li>
+        </ol>
+
+        <h3>Probar conectividad</h3>
+        <pre><code>mysql -u web -p123456789 -e "SHOW GLOBAL STATUS LIKE 'Queries'"</code></pre>
+
+        <h2 id="caracteristicas"><span class="emoji">📊</span> Características</h2>
+        <ul>
+            <li><strong>Gráfica en tiempo real</strong> con Chart.js</li>
+            <li><strong>Métricas separadas</strong>: Total QPS, SELECT, INSERT, UPDATE, DELETE</li>
+            <li><strong>Actualización automática</strong> cada 2 segundos</li>
+            <li><strong>Interfaz responsive</strong> y moderna</li>
+            <li><strong>Estadísticas en vivo</strong> con tarjetas informativas</li>
+            <li><strong>Debug integrado</strong> para diagnóstico</li>
+        </ul>
+
+        <h2 id="pruebas"><span class="emoji">🧪</span> Generar actividad de prueba</h2>
+        <p>Para ver la gráfica en acción, ejecuta consultas en MySQL:</p>
+        <pre><code>-- En otra terminal MySQL
+USE admindb;
+SELECT COUNT(*) FROM empresas;
+INSERT INTO empresas (empresa) VALUES ('Test');
+UPDATE empresas SET empresa='Test2' WHERE empresa='Test';
+DELETE FROM empresas WHERE empresa='Test2';</code></pre>
+
+        <h2 id="estructura"><span class="emoji">📁</span> Estructura del proyecto</h2>
+        <pre><code>monitor_mysql/
+├── app.py              # Aplicación Flask principal
+├── Pipfile             # Dependencias pipenv
+├── Pipfile.lock        # Versiones bloqueadas (generado automáticamente)
+├── requirements.txt    # Dependencias Python (alternativo)
+├── README.md          # Documentación en Markdown
+├── docs.html          # Esta documentación en HTML
+└── templates/
+    └── monitor.html   # Interfaz web con gráfica</code></pre>
+
+        <h2 id="diagnostico"><span class="emoji">🚨</span> Comandos de diagnóstico</h2>
+
+        <h3>Verificar permisos MySQL:</h3>
+        <pre><code>SHOW GRANTS FOR 'web'@'localhost';</code></pre>
+
+        <h3>Ver estadísticas actuales:</h3>
+        <pre><code>SHOW GLOBAL STATUS WHERE Variable_name IN ('Com_select', 'Com_insert', 'Com_update', 'Com_delete', 'Queries');</code></pre>
+
+        <h3>Logs de Flask:</h3>
+        <div class="info">
+            <ul>
+                <li>Los logs aparecen en la terminal donde ejecutaste <code>python app.py</code></li>
+                <li>Busca mensajes como "Stats obtenidas:" y "QPS calculado:"</li>
+            </ul>
+        </div>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #3498db;">
+        <div style="text-align: center; background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;">
+            <p style="color: #000; font-weight: bold; margin: 0; font-size: 16px;">
+                Monitor MySQL QPS - Desarrollado por <span style="color: #3498db;">Govani GSO</span> | Diciembre 2024
+            </p>
+        </div>
+    </div>
+</body>
+</html>
